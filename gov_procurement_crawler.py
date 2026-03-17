@@ -106,15 +106,52 @@ def extract_suppliers(html):
     suppliers = []
 
     for table in soup.find_all('table'):
-        rows = table.find_all('tr')
-        for row in rows[1:]:
+        # 查找表头
+        headers = []
+        header_row = table.find('thead')
+        if header_row:
+            headers = [th.get_text(strip=True) for th in header_row.find_all(['th', 'td'])]
+        else:
+            first_row = table.find('tr')
+            if first_row:
+                headers = [th.get_text(strip=True) for th in first_row.find_all(['th', 'td'])]
+
+        # 只处理包含"供应商"和"中标"或"成交"的表格（排除评分表）
+        if not any('供应商' in h for h in headers):
+            continue
+        if not any('中标' in h or '成交' in h for h in headers):
+            continue
+        if any('得分' in h or '排名' in h for h in headers):
+            continue  # 跳过评分表
+
+        # 找到供应商和价格列的索引
+        supplier_idx = None
+        price_idx = None
+        for i, h in enumerate(headers):
+            if '供应商名称' in h or h == '供应商':
+                supplier_idx = i
+            if ('中标' in h or '成交' in h) and ('金额' in h or '价格' in h):
+                price_idx = i
+
+        if supplier_idx is None:
+            continue
+
+        # 提取数据行
+        tbody = table.find('tbody')
+        rows = tbody.find_all('tr') if tbody else table.find_all('tr')[1:]
+
+        for row in rows:
             cols = row.find_all(['td', 'th'])
-            if len(cols) >= 2:
-                text = [col.get_text(strip=True) for col in cols]
-                if any('供应商' in t or '公司' in t or '元' in t for t in text):
+            if len(cols) > supplier_idx:
+                supplier = cols[supplier_idx].get_text(strip=True)
+                price = ''
+                if price_idx is not None and len(cols) > price_idx:
+                    price = cols[price_idx].get_text(strip=True)
+
+                if supplier and supplier not in headers:
                     suppliers.append({
-                        'supplier': text[0] if len(text) > 0 else '',
-                        'price': text[1] if len(text) > 1 else '',
+                        'supplier': supplier,
+                        'price': price,
                     })
 
     return suppliers
