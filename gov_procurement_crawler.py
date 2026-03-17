@@ -1,17 +1,26 @@
 #!/usr/bin/env python3
 """政府采购-中标结果公告爬虫"""
 import csv
+import json
+import os
 import time
 import requests
 from bs4 import BeautifulSoup
+import html2text
 
 BASE = "https://ygp.gdzwfw.gov.cn/ggzy-portal"
+OUTPUT_DIR = "政府采购数据"
 
 session = requests.Session()
 session.headers.update({
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
     "Referer": "https://ygp.gdzwfw.gov.cn/",
 })
+
+# 创建输出目录
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(f"{OUTPUT_DIR}/json", exist_ok=True)
+os.makedirs(f"{OUTPUT_DIR}/markdown", exist_ok=True)
 
 def get_items(page_no=1, page_size=10):
     """获取中标结果公告列表"""
@@ -156,9 +165,45 @@ def extract_suppliers(html):
 
     return suppliers
 
+def save_full_data(item, detail, project_code):
+    """保存完整数据为JSON和Markdown"""
+    # 保存JSON
+    full_data = {
+        "list_info": item,
+        "detail": detail
+    }
+    json_file = f"{OUTPUT_DIR}/json/{project_code}.json"
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(full_data, f, ensure_ascii=False, indent=2)
+
+    # 保存Markdown
+    h = html2text.HTML2Text()
+    h.ignore_links = False
+    h.body_width = 0
+
+    md_content = f"# {detail.get('title', '')}\n\n"
+    md_content += f"**项目编号**: {project_code}\n\n"
+    md_content += f"**发布时间**: {detail.get('publishDate', '')}\n\n"
+
+    for col in detail.get('tradingNoticeColumnModelList', []):
+        md_content += f"## {col.get('name', '')}\n\n"
+
+        if col.get('multiKeyValueTableList'):
+            for table in col['multiKeyValueTableList']:
+                for kv in table:
+                    md_content += f"- **{kv['key']}**: {kv.get('value', '')}\n"
+            md_content += "\n"
+
+        if col.get('richtext'):
+            md_content += h.handle(col['richtext']) + "\n\n"
+
+    md_file = f"{OUTPUT_DIR}/markdown/{project_code}.md"
+    with open(md_file, 'w', encoding='utf-8') as f:
+        f.write(md_content)
+
 def main():
     """主函数"""
-    csv_file = "政府采购中标结果.csv"
+    csv_file = f"{OUTPUT_DIR}/政府采购中标结果.csv"
 
     # 获取第一页数据
     page_data = get_items(page_no=1, page_size=10)
@@ -181,6 +226,9 @@ def main():
         detail = get_detail(item, node_id)
         if not detail:
             continue
+
+        # 保存完整数据
+        save_full_data(item, detail, item['projectCode'])
 
         parsed = parse_detail(detail)
         suppliers = extract_suppliers(parsed['richtext'])
@@ -216,7 +264,10 @@ def main():
         for row in all_rows:
             writer.writerow(row)
 
-    print(f"\n✅ 数据已保存到 {csv_file}")
+    print(f"\n✅ 数据已保存:")
+    print(f"  - CSV: {csv_file}")
+    print(f"  - JSON: {OUTPUT_DIR}/json/")
+    print(f"  - Markdown: {OUTPUT_DIR}/markdown/")
 
 if __name__ == "__main__":
     main()
