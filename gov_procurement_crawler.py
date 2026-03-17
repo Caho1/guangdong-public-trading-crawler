@@ -165,14 +165,25 @@ def extract_suppliers(html):
 
     return suppliers
 
-def save_full_data(item, detail, project_code):
+def sanitize_filename(name):
+    """清理文件名中的非法字符"""
+    invalid_chars = '<>:"/\\|?*'
+    for char in invalid_chars:
+        name = name.replace(char, '_')
+    return name.strip()
+
+def save_full_data(item, detail, project_name, project_code):
     """保存完整数据为JSON和Markdown"""
+    # 使用项目名称作为文件名
+    safe_name = sanitize_filename(project_name)
+    filename = f"{safe_name}_{project_code}"
+
     # 保存JSON
     full_data = {
         "list_info": item,
         "detail": detail
     }
-    json_file = f"{OUTPUT_DIR}/json/{project_code}.json"
+    json_file = f"{OUTPUT_DIR}/json/{filename}.json"
     with open(json_file, 'w', encoding='utf-8') as f:
         json.dump(full_data, f, ensure_ascii=False, indent=2)
 
@@ -197,7 +208,7 @@ def save_full_data(item, detail, project_code):
         if col.get('richtext'):
             md_content += h.handle(col['richtext']) + "\n\n"
 
-    md_file = f"{OUTPUT_DIR}/markdown/{project_code}.md"
+    md_file = f"{OUTPUT_DIR}/markdown/{filename}.md"
     with open(md_file, 'w', encoding='utf-8') as f:
         f.write(md_content)
 
@@ -227,10 +238,13 @@ def main():
         if not detail:
             continue
 
-        # 保存完整数据
-        save_full_data(item, detail, item['projectCode'])
-
+        # 获取项目名称
         parsed = parse_detail(detail)
+        project_name = parsed['kv_info'].get('采购项目名称', item['noticeTitle'])
+
+        # 保存完整数据
+        save_full_data(item, detail, project_name, item['projectCode'])
+
         suppliers = extract_suppliers(parsed['richtext'])
 
         all_fields.update(parsed['kv_info'].keys())
