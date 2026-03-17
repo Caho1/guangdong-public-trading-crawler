@@ -19,3 +19,7 @@ downloads/
 # OS
 .DS_Store
 Thumbs.db
+
+# 数据目录
+data/
+*.log

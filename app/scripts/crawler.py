@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import html2text
 
 BASE = "https://ygp.gdzwfw.gov.cn/ggzy-portal"
-OUTPUT_DIR = "政府采购数据"
+OUTPUT_DIR = "data/gov_procurement"
 
 session = requests.Session()
 session.headers.update({
