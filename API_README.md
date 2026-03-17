@@ -2,6 +2,19 @@
 
 FastAPI 封装的政府采购中标结果查询接口。
 
+## 项目结构
+
+```
+app/
+├── main.py          # 应用入口
+├── api/
+│   └── routes.py    # API 路由
+├── services/
+│   └── crawler.py   # 爬虫服务
+└── core/
+    └── config.py    # 配置文件
+```
+
 ## 安装依赖
 
 ```bash
@@ -11,14 +24,11 @@ uv pip install fastapi uvicorn requests
 ## 启动服务
 
 ```bash
-# 方式1：直接运行
-python api.py
+# 使用 uvicorn
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-# 方式2：使用 uvicorn
-uvicorn api:app --host 0.0.0.0 --port 8000
-
-# 方式3：后台运行
-nohup uvicorn api:app --host 0.0.0.0 --port 8000 > api.log 2>&1 &
+# 后台运行
+nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > api.log 2>&1 &
 ```
 
 ## API 接口
