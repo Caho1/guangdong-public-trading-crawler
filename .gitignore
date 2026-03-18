@@ -23,3 +23,4 @@ Thumbs.db
 # 数据目录
 data/
 *.log
+.superpowers/

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广东省政府采购中标结果</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Lexend', 'Noto Sans SC', 'sans-serif'],
+                        body: ['Noto Sans SC', 'Lexend', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3B82F6', 600:'#2563EB', 700:'#1d4ed8', 800:'#1e40af', 900:'#1e3a8a' },
+                        surface: { 50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8F0', 300:'#CBD5E1', 400:'#94A3B8', 500:'#64748B', 600:'#475569', 700:'#334155', 800:'#1E293B', 900:'#0F172A' },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans SC', 'Lexend', sans-serif; }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Markdown 渲染样式 */
+        .md-body h1 { font-size: 1.5rem; font-weight: 700; color: #0F172A; margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #E2E8F0; }
+        .md-body h2 { font-size: 1.25rem; font-weight: 600; color: #1E293B; margin: 1.25rem 0 0.75rem; padding-bottom: 0.375rem; border-bottom: 1px solid #E2E8F0; }
+        .md-body h3 { font-size: 1.1rem; font-weight: 600; color: #1E293B; margin: 1rem 0 0.5rem; }
+        .md-body h4 { font-size: 1rem; font-weight: 600; color: #334155; margin: 1rem 0 0.5rem; }
+        .md-body h5 { font-size: 0.95rem; font-weight: 600; color: #475569; margin: 0.75rem 0 0.375rem; }
+        .md-body h6 { font-size: 0.875rem; font-weight: 600; color: #475569; margin: 0.75rem 0 0.375rem; }
+        .md-body p { margin: 0.5rem 0; line-height: 1.75; color: #334155; }
+        .md-body ul { list-style: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .md-body ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .md-body li { margin: 0.25rem 0; color: #334155; line-height: 1.625; }
+        .md-body strong { color: #0F172A; font-weight: 600; }
+        .md-body a { color: #2563EB; text-decoration: underline; text-underline-offset: 2px; }
+        .md-body a:hover { color: #1d4ed8; }
+        .md-body hr { border: none; border-top: 1px solid #E2E8F0; margin: 1rem 0; }
+        .md-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.875rem; }
+        .md-body thead { background: #F1F5F9; }
+        .md-body th { padding: 0.625rem 0.75rem; text-align: left; font-weight: 600; color: #1E293B; border: 1px solid #E2E8F0; white-space: nowrap; }
+        .md-body td { padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0; color: #334155; vertical-align: top; }
+        .md-body tr:hover td { background: #F8FAFC; }
+        .md-body blockquote { border-left: 3px solid #3B82F6; padding: 0.5rem 1rem; margin: 0.75rem 0; background: #eff6ff; color: #1e40af; border-radius: 0 0.375rem 0.375rem 0; }
+        .md-body code { background: #F1F5F9; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.85em; color: #be185d; }
+        .md-body pre { background: #0F172A; color: #E2E8F0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.75rem 0; }
+        .md-body pre code { background: none; color: inherit; padding: 0; }
+
+        .item-card { transition: all 0.15s ease; }
+        .item-card:hover { background: #F1F5F9; }
+        .item-card.active { background: #eff6ff; border-left: 3px solid #2563EB; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin 0.8s linear infinite; }
+    </style>
+</head>
+<body class="bg-surface-50 text-surface-800 antialiased">
+
+    <!-- 顶部导航 -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface-200">
+        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <h1 class="font-heading font-semibold text-lg text-surface-900">广东省政府采购中标结果</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="stats-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        <span id="stats-count">0</span> 条数据
+                    </span>
+                    <button onclick="handleCrawl()" id="crawl-btn" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-150">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span id="crawl-btn-text">抓取数据</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主布局 -->
+    <main class="pt-14 h-screen flex">
+        <!-- 左侧列表 -->
+        <aside id="sidebar" class="w-full lg:w-[420px] xl:w-[460px] flex-shrink-0 border-r border-surface-200 bg-white flex flex-col h-[calc(100vh-56px)]">
+            <!-- 搜索栏 -->
+            <div class="p-3 border-b border-surface-200">
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input id="search-input" type="text" placeholder="搜索项目名称、编号..." class="w-full pl-9 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-800 placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-150">
+                </div>
+                <div class="flex items-center gap-2 mt-2">
+                    <button onclick="loadSource('local')" id="tab-local" class="cursor-pointer px-3 py-1 text-xs font-medium rounded-md bg-primary-50 text-primary-700 transition-colors duration-150">本地数据</button>
+                    <button onclick="loadSource('remote')" id="tab-remote" class="cursor-pointer px-3 py-1 text-xs font-medium rounded-md text-surface-500 hover:bg-surface-100 transition-colors duration-150">实时查询</button>
+                </div>
+            </div>
+
+            <!-- 列表 -->
+            <div id="item-list" class="flex-1 overflow-y-auto scrollbar-thin">
+                <!-- 加载中 -->
+                <div id="list-loading" class="flex flex-col items-center justify-center py-16 text-surface-400">
+                    <div class="w-8 h-8 border-2 border-surface-200 border-t-primary-500 rounded-full spinner"></div>
+                    <p class="mt-3 text-sm">加载中...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧详情 -->
+        <section id="detail-panel" class="flex-1 overflow-y-auto scrollbar-thin bg-white hidden lg:block">
+            <!-- 空状态 -->
+            <div id="detail-empty" class="flex flex-col items-center justify-center h-full text-surface-400">
+                <svg class="w-16 h-16 mb-4 text-surface-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <p class="text-base font-medium text-surface-500">选择一条记录查看详情</p>
+                <p class="text-sm mt-1">点击左侧列表中的项目</p>
+            </div>
+            <!-- 详情内容 -->
+            <div id="detail-content" class="hidden">
+                <!-- 顶部信息栏 -->
+                <div id="detail-header" class="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-surface-200 px-6 lg:px-8 py-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <h2 id="detail-title" class="font-heading font-semibold text-lg text-surface-900 leading-tight"></h2>
+                            <div id="detail-meta" class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-surface-500"></div>
+                        </div>
+                        <button onclick="closeDetail()" class="cursor-pointer lg:hidden flex-shrink-0 p-1.5 rounded-lg hover:bg-surface-100 text-surface-400 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Markdown 内容 -->
+                <article id="detail-markdown" class="md-body px-6 lg:px-8 py-6 max-w-none"></article>
+            </div>
+            <!-- 加载中 -->
+            <div id="detail-loading" class="hidden flex flex-col items-center justify-center h-full text-surface-400">
+                <div class="w-8 h-8 border-2 border-surface-200 border-t-primary-500 rounded-full spinner"></div>
+                <p class="mt-3 text-sm">加载详情...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 移动端返回按钮（查看详情时） -->
+    <div id="mobile-back" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 lg:hidden">
+        <button onclick="closeDetail()" class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-surface-800 text-white text-sm font-medium rounded-full shadow-lg hover:bg-surface-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            返回列表
+        </button>
+    </div>
+
+    <!-- 抓取设置弹窗 -->
+    <div id="crawl-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
+        <div class="absolute inset-0 bg-surface-900/40 backdrop-blur-sm" onclick="closeCrawlModal()"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-[360px] mx-4 fade-in">
+            <div class="px-6 pt-5 pb-4">
+                <h3 class="font-heading font-semibold text-base text-surface-900">抓取设置</h3>
+                <p class="text-sm text-surface-500 mt-1">增量抓取，已有数据会自动跳过</p>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-surface-700 mb-1.5">抓取条数</label>
+                    <div class="flex items-center gap-2">
+                        <button onclick="setCrawlSize(10)" class="crawl-size-btn cursor-pointer px-3 py-1.5 text-sm font-medium rounded-lg border border-surface-200 hover:border-primary-300 hover:bg-primary-50 transition-colors" data-size="10">10</button>
+                        <button onclick="setCrawlSize(20)" class="crawl-size-btn cursor-pointer px-3 py-1.5 text-sm font-medium rounded-lg border border-surface-200 hover:border-primary-300 hover:bg-primary-50 transition-colors" data-size="20">20</button>
+                        <button onclick="setCrawlSize(50)" class="crawl-size-btn cursor-pointer px-3 py-1.5 text-sm font-medium rounded-lg border border-surface-200 hover:border-primary-300 hover:bg-primary-50 transition-colors" data-size="50">50</button>
+                        <button onclick="setCrawlSize(100)" class="crawl-size-btn cursor-pointer px-3 py-1.5 text-sm font-medium rounded-lg border border-surface-200 hover:border-primary-300 hover:bg-primary-50 transition-colors" data-size="100">100</button>
+                        <input id="crawl-size-input" type="number" min="1" max="100" value="10" class="w-20 px-3 py-1.5 text-sm border border-surface-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 pb-5 flex items-center justify-end gap-2">
+                <button onclick="closeCrawlModal()" class="cursor-pointer px-4 py-2 text-sm font-medium text-surface-600 hover:bg-surface-100 rounded-lg transition-colors">取消</button>
+                <button onclick="startCrawl()" id="modal-crawl-btn" class="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">开始抓取</button>
+            </div>
+            <!-- 抓取进度 -->
+            <div id="crawl-progress" class="hidden px-6 pb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-5 h-5 border-2 border-surface-200 border-t-primary-500 rounded-full spinner"></div>
+                    <span id="crawl-progress-text" class="text-sm text-surface-600">正在抓取...</span>
+                </div>
+            </div>
+            <!-- 抓取结果 -->
+            <div id="crawl-result" class="hidden px-6 pb-5">
+                <div id="crawl-result-content" class="p-3 rounded-lg text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+const API = '';
+let currentSource = 'local';
+let currentItems = [];
+let activeFilename = null;
+let searchTimer = null;
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    loadLocalData();
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            if (currentSource === 'local') loadLocalData(e.target.value);
+            else loadRemoteData(1, e.target.value);
+        }, 300);
+    });
+});
+
+function loadSource(source) {
+    currentSource = source;
+    document.getElementById('tab-local').className = source === 'local'
+        ? 'cursor-pointer px-3 py-1 text-xs font-medium rounded-md bg-primary-50 text-primary-700 transition-colors duration-150'
+        : 'cursor-pointer px-3 py-1 text-xs font-medium rounded-md text-surface-500 hover:bg-surface-100 transition-colors duration-150';
+    document.getElementById('tab-remote').className = source === 'remote'
+        ? 'cursor-pointer px-3 py-1 text-xs font-medium rounded-md bg-primary-50 text-primary-700 transition-colors duration-150'
+        : 'cursor-pointer px-3 py-1 text-xs font-medium rounded-md text-surface-500 hover:bg-surface-100 transition-colors duration-150';
+    const keyword = document.getElementById('search-input').value;
+    if (source === 'local') loadLocalData(keyword);
+    else loadRemoteData(1, keyword);
+}
+
+async function loadLocalData(keyword = '') {
+    showListLoading();
+    try {
+        const resp = await fetch(`${API}/api/local/list?keyword=${encodeURIComponent(keyword)}`);
+        const data = await resp.json();
+        currentItems = data.items;
+        renderList(data.items);
+        document.getElementById('stats-count').textContent = data.total;
+        document.getElementById('stats-badge').classList.remove('hidden');
+    } catch (e) {
+        showListError('加载失败: ' + e.message);
+    }
+}
+
+async function loadRemoteData(page = 1, keyword = '') {
+    showListLoading();
+    try {
+        const resp = await fetch(`${API}/api/items?page=${page}&size=20&keyword=${encodeURIComponent(keyword)}`);
+        const data = await resp.json();
+        currentItems = data.items;
+        renderList(data.items.map(item => ({
+            filename: '',
+            title: item.noticeTitle,
+            projectCode: item.projectCode,
+            publishDate: formatDate(item.publishDate),
+            regionName: item.regionName || item.siteName,
+            projectOwner: item.projectOwner || '',
+            price: '',
+            priceDisplay: '',
+            priceUnit: '',
+        })), true);
+        document.getElementById('stats-count').textContent = data.total;
+        document.getElementById('stats-badge').classList.remove('hidden');
+    } catch (e) {
+        showListError('查询失败: ' + e.message);
+    }
+}
+
+function renderList(items, isRemote = false) {
+    const container = document.getElementById('item-list');
+    if (!items.length) {
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 text-surface-400">
+                <svg class="w-12 h-12 mb-3 text-surface-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                <p class="text-sm font-medium">暂无数据</p>
+                <p class="text-xs mt-1">试试抓取数据或更换关键词</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = items.map((item, idx) => {
+        const id = item.filename || item.projectCode;
+        const priceHtml = item.priceDisplay
+            ? `<span class="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">${formatPrice(item.priceDisplay)}${item.priceUnit ? ' ' + item.priceUnit : ''}</span>`
+            : '';
+        return `
+        <div class="item-card cursor-pointer px-4 py-3 border-b border-surface-100 ${activeFilename === id ? 'active' : ''}"
+             onclick="${isRemote ? `loadRemoteDetail('${item.projectCode}')` : `loadMarkdown('${encodeURIComponent(item.filename)}')`}"
+             data-id="${id}">
+            <h3 class="text-sm font-medium text-surface-800 leading-snug line-clamp-2">${escapeHtml(item.title)}</h3>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                <span class="text-xs text-surface-400">${escapeHtml(item.projectCode)}</span>
+                ${item.regionName ? `<span class="text-xs text-surface-400">${escapeHtml(item.regionName)}</span>` : ''}
+                ${priceHtml}
+            </div>
+            <div class="flex items-center gap-3 mt-1">
+                ${item.projectOwner ? `<span class="text-xs text-surface-400">${escapeHtml(item.projectOwner)}</span>` : ''}
+                ${item.publishDate ? `<span class="text-xs text-surface-300">${escapeHtml(item.publishDate)}</span>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function loadMarkdown(encodedFilename) {
+    const filename = decodeURIComponent(encodedFilename);
+    activeFilename = filename;
+    highlightActive(filename);
+    showDetailLoading();
+    showDetailPanel();
+
+    try {
+        const resp = await fetch(`${API}/api/local/markdown/${encodeURIComponent(filename)}`);
+        const data = await resp.json();
+
+        const item = currentItems.find(i => i.filename === filename);
+        showDetailContent(
+            item?.title || filename,
+            item?.projectCode || '',
+            item?.publishDate || '',
+            item?.regionName || '',
+            data.content
+        );
+    } catch (e) {
+        document.getElementById('detail-markdown').innerHTML = `<p class="text-red-500">加载失败: ${e.message}</p>`;
+    }
+}
+
+async function loadRemoteDetail(projectCode) {
+    activeFilename = projectCode;
+    highlightActive(projectCode);
+    showDetailLoading();
+    showDetailPanel();
+
+    try {
+        const resp = await fetch(`${API}/api/items/${projectCode}`);
+        const data = await resp.json();
+
+        // 从detail构造markdown
+        let md = `# ${data.detail.title || ''}\n\n`;
+        md += `**项目编号**: ${projectCode}\n\n`;
+        md += `**发布时间**: ${data.detail.publishDate || ''}\n\n`;
+        for (const col of (data.detail.tradingNoticeColumnModelList || [])) {
+            md += `## ${col.name || ''}\n\n`;
+            if (col.multiKeyValueTableList) {
+                for (const table of col.multiKeyValueTableList) {
+                    for (const kv of table) {
+                        md += `- **${kv.key}**: ${kv.value || ''}\n`;
+                    }
+                }
+                md += '\n';
+            }
+            if (col.richtext) {
+                md += col.richtext + '\n\n';
+            }
+        }
+
+        const item = currentItems.find(i => (i.projectCode || '') === projectCode) || {};
+        showDetailContent(
+            data.detail.title || projectCode,
+            projectCode,
+            data.detail.publishDate || '',
+            item.regionName || data.list_info?.regionName || '',
+            md
+        );
+    } catch (e) {
+        document.getElementById('detail-loading').classList.add('hidden');
+        document.getElementById('detail-content').classList.remove('hidden');
+        document.getElementById('detail-markdown').innerHTML = `<p class="text-red-500">加载失败: ${e.message}</p>`;
+    }
+}
+
+function showDetailContent(title, code, date, region, markdown) {
+    document.getElementById('detail-loading').classList.add('hidden');
+    document.getElementById('detail-empty').classList.add('hidden');
+    const content = document.getElementById('detail-content');
+    content.classList.remove('hidden');
+    content.classList.add('fade-in');
+
+    document.getElementById('detail-title').textContent = title;
+
+    const metaItems = [];
+    if (code) metaItems.push(`<span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>${escapeHtml(code)}</span>`);
+    if (date) metaItems.push(`<span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>${escapeHtml(date)}</span>`);
+    if (region) metaItems.push(`<span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${escapeHtml(region)}</span>`);
+    document.getElementById('detail-meta').innerHTML = metaItems.join('');
+
+    // 渲染 Markdown（如果内容含 HTML 标签则混合渲染）
+    const rendered = marked.parse(markdown, { breaks: true, gfm: true });
+    document.getElementById('detail-markdown').innerHTML = rendered;
+
+    // 滚动到顶部
+    document.getElementById('detail-panel').scrollTop = 0;
+}
+
+function handleCrawl() {
+    // 打开设置弹窗
+    document.getElementById('crawl-modal').classList.remove('hidden');
+    document.getElementById('crawl-progress').classList.add('hidden');
+    document.getElementById('crawl-result').classList.add('hidden');
+    document.getElementById('modal-crawl-btn').disabled = false;
+    document.getElementById('modal-crawl-btn').classList.remove('opacity-60');
+    setCrawlSize(10);
+}
+
+function closeCrawlModal() {
+    document.getElementById('crawl-modal').classList.add('hidden');
+}
+
+function setCrawlSize(size) {
+    document.getElementById('crawl-size-input').value = size;
+    document.querySelectorAll('.crawl-size-btn').forEach(btn => {
+        btn.classList.toggle('bg-primary-50', parseInt(btn.dataset.size) === size);
+        btn.classList.toggle('border-primary-400', parseInt(btn.dataset.size) === size);
+        btn.classList.toggle('text-primary-700', parseInt(btn.dataset.size) === size);
+    });
+}
+
+async function startCrawl() {
+    const size = parseInt(document.getElementById('crawl-size-input').value) || 10;
+    const btn = document.getElementById('modal-crawl-btn');
+    btn.disabled = true;
+    btn.classList.add('opacity-60');
+
+    // 显示进度
+    document.getElementById('crawl-progress').classList.remove('hidden');
+    document.getElementById('crawl-result').classList.add('hidden');
+    document.getElementById('crawl-progress-text').textContent = `正在增量抓取 ${size} 条新数据...`;
+
+    // 顶部按钮也同步状态
+    document.getElementById('crawl-btn').disabled = true;
+    document.getElementById('crawl-btn-text').textContent = '抓取中...';
+    document.getElementById('crawl-btn').classList.add('opacity-60');
+
+    try {
+        const resp = await fetch(`${API}/api/crawl?size=${size}`, { method: 'POST' });
+        const data = await resp.json();
+
+        document.getElementById('crawl-progress').classList.add('hidden');
+        document.getElementById('crawl-result').classList.remove('hidden');
+
+        const resultEl = document.getElementById('crawl-result-content');
+        if (data.success) {
+            const newCount = data.new || 0;
+            const skipped = data.skipped || 0;
+            const total = data.total || 0;
+            resultEl.className = 'p-3 rounded-lg text-sm bg-green-50 text-green-800';
+            resultEl.innerHTML = `
+                <p class="font-medium">抓取完成</p>
+                <p class="mt-1">新增 <strong>${newCount}</strong> 条 / 跳过 <strong>${skipped}</strong> 条已有数据</p>
+                <p class="text-green-600">本地共 <strong>${total}</strong> 条数据</p>`;
+            loadLocalData();
+        } else {
+            resultEl.className = 'p-3 rounded-lg text-sm bg-red-50 text-red-800';
+            resultEl.innerHTML = `<p class="font-medium">抓取失败</p><p class="mt-1">${escapeHtml(data.message || '未知错误')}</p>`;
+        }
+    } catch (e) {
+        document.getElementById('crawl-progress').classList.add('hidden');
+        document.getElementById('crawl-result').classList.remove('hidden');
+        const resultEl = document.getElementById('crawl-result-content');
+        resultEl.className = 'p-3 rounded-lg text-sm bg-red-50 text-red-800';
+        resultEl.innerHTML = `<p class="font-medium">请求失败</p><p class="mt-1">${escapeHtml(e.message)}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-60');
+        document.getElementById('crawl-btn').disabled = false;
+        document.getElementById('crawl-btn-text').textContent = '抓取数据';
+        document.getElementById('crawl-btn').classList.remove('opacity-60');
+    }
+}
+
+// UI 辅助函数
+function showListLoading() {
+    document.getElementById('item-list').innerHTML = `
+        <div class="flex flex-col items-center justify-center py-16 text-surface-400">
+            <div class="w-8 h-8 border-2 border-surface-200 border-t-primary-500 rounded-full spinner"></div>
+            <p class="mt-3 text-sm">加载中...</p>
+        </div>`;
+}
+
+function showListError(msg) {
+    document.getElementById('item-list').innerHTML = `
+        <div class="flex flex-col items-center justify-center py-16 text-surface-400">
+            <svg class="w-12 h-12 mb-3 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.999L13.732 4.001c-.77-1.333-2.694-1.333-3.464 0L3.34 16.001C2.57 17.335 3.532 19 5.072 19z"/></svg>
+            <p class="text-sm text-red-500">${msg}</p>
+        </div>`;
+}
+
+function showDetailLoading() {
+    document.getElementById('detail-empty').classList.add('hidden');
+    document.getElementById('detail-content').classList.add('hidden');
+    document.getElementById('detail-loading').classList.remove('hidden');
+}
+
+function showDetailPanel() {
+    // 移动端显示详情面板
+    if (window.innerWidth < 1024) {
+        document.getElementById('sidebar').classList.add('hidden');
+        document.getElementById('detail-panel').classList.remove('hidden');
+        document.getElementById('mobile-back').classList.remove('hidden');
+    }
+}
+
+function closeDetail() {
+    if (window.innerWidth < 1024) {
+        document.getElementById('sidebar').classList.remove('hidden');
+        document.getElementById('detail-panel').classList.add('hidden');
+        document.getElementById('mobile-back').classList.add('hidden');
+    }
+}
+
+function highlightActive(id) {
+    document.querySelectorAll('.item-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.id === id);
+    });
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function formatDate(raw) {
+    if (!raw || raw.includes('-')) return raw || '';
+    // "20260318101948" -> "2026-03-18 10:19:48"
+    return raw.replace(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1-$2-$3 $4:$5:$6');
+}
+
+function formatPrice(p) {
+    if (!p) return '';
+    // 如果是纯数字
+    const num = parseFloat(p);
+    if (!isNaN(num) && num > 0) {
+        if (num >= 10000) return (num / 10000).toFixed(2) + '万';
+        return num.toLocaleString('zh-CN');
+    }
+    return p;
+}
+</script>
+
+</body>
+</html>
