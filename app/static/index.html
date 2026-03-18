@@ -102,6 +102,23 @@
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input id="search-input" type="text" placeholder="搜索项目名称、编号..." class="w-full pl-9 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-800 placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-150">
                 </div>
+                <div id="local-filter-row" class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                    <select id="region-filter" class="min-w-0 px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-150">
+                        <option value="">全部地区</option>
+                    </select>
+                    <select id="owner-filter" class="min-w-0 px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-150">
+                        <option value="">全部采购单位</option>
+                    </select>
+                    <select id="publish-filter" class="min-w-0 px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all duration-150">
+                        <option value="all">全部时间</option>
+                        <option value="today">今天</option>
+                        <option value="7d">近 7 天</option>
+                        <option value="30d">近 30 天</option>
+                    </select>
+                    <button id="filter-apply-btn" class="sm:col-span-2 cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-150">
+                        确定
+                    </button>
+                </div>
                 <div class="flex items-center gap-2 mt-2">
                     <button onclick="loadSource('local')" id="tab-local" class="cursor-pointer px-3 py-1 text-xs font-medium rounded-md bg-primary-50 text-primary-700 transition-colors duration-150">本地数据</button>
                     <button onclick="loadSource('remote')" id="tab-remote" class="cursor-pointer px-3 py-1 text-xs font-medium rounded-md text-surface-500 hover:bg-surface-100 transition-colors duration-150">实时查询</button>
@@ -201,10 +218,17 @@ let currentSource = 'local';
 let currentItems = [];
 let activeFilename = null;
 let searchTimer = null;
+let appliedLocalFilters = {
+    region: '',
+    projectOwner: '',
+    publishRange: 'all',
+};
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('filter-apply-btn').addEventListener('click', applyLocalFilters);
     loadLocalData();
+    updateFilterControls();
     document.getElementById('search-input').addEventListener('input', (e) => {
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => {
@@ -222,6 +246,7 @@ function loadSource(source) {
     document.getElementById('tab-remote').className = source === 'remote'
         ? 'cursor-pointer px-3 py-1 text-xs font-medium rounded-md bg-primary-50 text-primary-700 transition-colors duration-150'
         : 'cursor-pointer px-3 py-1 text-xs font-medium rounded-md text-surface-500 hover:bg-surface-100 transition-colors duration-150';
+    updateFilterControls();
     const keyword = document.getElementById('search-input').value;
     if (source === 'local') loadLocalData(keyword);
     else loadRemoteData(1, keyword);
@@ -230,10 +255,20 @@ function loadSource(source) {
 async function loadLocalData(keyword = '') {
     showListLoading();
     try {
-        const resp = await fetch(`${API}/api/local/list?keyword=${encodeURIComponent(keyword)}`);
+        const filters = appliedLocalFilters;
+        const params = new URLSearchParams();
+        params.set('keyword', keyword);
+        if (filters.region) params.set('region', filters.region);
+        if (filters.projectOwner) params.set('project_owner', filters.projectOwner);
+        if (filters.publishRange && filters.publishRange !== 'all') params.set('publish_range', filters.publishRange);
+
+        const resp = await fetch(`${API}/api/local/list?${params.toString()}`);
         const data = await resp.json();
         currentItems = data.items;
         renderList(data.items);
+        if (!keyword && !hasActiveLocalFilters(filters)) {
+            populateLocalFilterOptions(data.items);
+        }
         document.getElementById('stats-count').textContent = data.total;
         document.getElementById('stats-badge').classList.remove('hidden');
     } catch (e) {
@@ -465,6 +500,53 @@ async function startCrawl() {
         document.getElementById('crawl-btn-text').textContent = '抓取数据';
         document.getElementById('crawl-btn').classList.remove('opacity-60');
     }
+}
+
+function getSelectedLocalFilters() {
+    return {
+        region: document.getElementById('region-filter').value,
+        projectOwner: document.getElementById('owner-filter').value,
+        publishRange: document.getElementById('publish-filter').value,
+    };
+}
+
+function hasActiveLocalFilters(filters) {
+    return Boolean(filters.region || filters.projectOwner || (filters.publishRange && filters.publishRange !== 'all'));
+}
+
+function populateLocalFilterOptions(items) {
+    const regions = [...new Set(items.map(item => item.regionName).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+    const owners = [...new Set(items.map(item => item.projectOwner).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+    setSelectOptions('region-filter', '全部地区', regions);
+    setSelectOptions('owner-filter', '全部采购单位', owners);
+}
+
+function setSelectOptions(elementId, placeholder, values) {
+    const select = document.getElementById(elementId);
+    const currentValue = select.value;
+    select.innerHTML = [`<option value="">${placeholder}</option>`]
+        .concat(values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`))
+        .join('');
+
+    if (values.includes(currentValue)) {
+        select.value = currentValue;
+    }
+}
+
+function updateFilterControls() {
+    const isLocal = currentSource === 'local';
+    const row = document.getElementById('local-filter-row');
+    row.classList.toggle('opacity-60', !isLocal);
+    ['region-filter', 'owner-filter', 'publish-filter', 'filter-apply-btn'].forEach((id) => {
+        const element = document.getElementById(id);
+        element.disabled = !isLocal;
+    });
+}
+
+function applyLocalFilters() {
+    if (currentSource !== 'local') return;
+    appliedLocalFilters = getSelectedLocalFilters();
+    loadLocalData(document.getElementById('search-input').value);
 }
 
 // UI 辅助函数

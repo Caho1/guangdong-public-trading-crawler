@@ -1,6 +1,14 @@
-INFO:     Started server process [40815]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:62172 - "GET / HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62185 - "GET /api/items?page=1&size=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7348 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7349 - "GET /api/local/list HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7350 - "GET /api/local/list?region=%E6%B7%B1%E5%9C%B3%E5%B8%82 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14572 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14572 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:14572 - "GET /api/local/list?keyword= HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13215 - "GET /api/local/markdown/2024%E5%B9%B4%E6%B5%88%E6%B1%9F%E5%8C%BA%E5%86%9C%E6%9D%91%E9%81%93%E8%B7%AF%EF%BC%88%E4%B8%8B%E9%99%82-%E5%86%85%E8%85%BE%EF%BC%89%E6%94%B9%E9%80%A0%E5%B7%A5%E7%A8%8B_2026-021-SZJX-CSZ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8663 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2952 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2952 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:2952 - "GET /api/local/list?keyword= HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2952 - "GET /api/local/list?keyword=&region=%E4%BD%9B%E5%B1%B1%E5%B8%82 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2952 - "GET /api/local/list?keyword= HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2952 - "GET /api/local/markdown/2024%E5%B9%B4%E6%B5%88%E6%B1%9F%E5%8C%BA%E5%86%9C%E6%9D%91%E9%81%93%E8%B7%AF%EF%BC%88%E4%B8%8B%E9%99%82-%E5%86%85%E8%85%BE%EF%BC%89%E6%94%B9%E9%80%A0%E5%B7%A5%E7%A8%8B_2026-021-SZJX-CSZ HTTP/1.1" 200 OK

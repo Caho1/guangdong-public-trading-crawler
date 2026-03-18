@@ -3,12 +3,46 @@ import os
 import json
 import subprocess
 import sys
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Query, HTTPException
 from app.services.crawler import crawler_service
 
 router = APIRouter(prefix="/api", tags=["政府采购"])
 
 DATA_DIR = "data/gov_procurement"
+
+
+def parse_publish_date(value: str):
+    """解析发布时间字符串为 datetime。"""
+    if not value:
+        return None
+
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%Y%m%d%H%M%S", "%Y%m%d"):
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def matches_publish_range(value: str, publish_range: str) -> bool:
+    """判断发布时间是否命中范围筛选。"""
+    if publish_range in ("", "all"):
+        return True
+
+    publish_date = parse_publish_date(value)
+    if not publish_date:
+        return False
+
+    now = datetime.now()
+    if publish_range == "today":
+        return publish_date.date() == now.date()
+    if publish_range == "7d":
+        return publish_date >= now - timedelta(days=7)
+    if publish_range == "30d":
+        return publish_date >= now - timedelta(days=30)
+
+    return True
 
 
 @router.get("/items")
@@ -87,7 +121,12 @@ def run_crawl(size: int = Query(10, ge=1, le=100, description="抓取条数")):
 
 
 @router.get("/local/list")
-def list_local_items(keyword: str = Query("", description="搜索关键词")):
+def list_local_items(
+    keyword: str = Query("", description="搜索关键词"),
+    region: str = Query("", description="地区"),
+    project_owner: str = Query("", description="采购单位"),
+    publish_range: str = Query("all", description="发布时间范围"),
+):
     """获取本地已爬取的数据列表"""
     json_dir = os.path.join(DATA_DIR, "json")
     if not os.path.isdir(json_dir):
@@ -130,6 +169,12 @@ def list_local_items(keyword: str = Query("", description="搜索关键词")):
             "nature": kv_info.get("公告性质", ""),
         }
 
+        if region and item["regionName"] != region:
+            continue
+        if project_owner and item["projectOwner"] != project_owner:
+            continue
+        if not matches_publish_range(item["publishDate"], publish_range):
+            continue
         if keyword and keyword.lower() not in json.dumps(item, ensure_ascii=False).lower():
             continue
         items.append(item)
